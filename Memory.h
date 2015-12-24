@@ -16,6 +16,7 @@ class Memory
   private:
 
     void writeByte(uint8_t byteToWrite, uint32_t byteLocation);
+    void write6Bytes(uint32_t bytesToWrite, uint32_t byteLocation);
     uint8_t getByte(uint8_t address);
     uint8_t selectBlock();
     uint8_t currentBlock;

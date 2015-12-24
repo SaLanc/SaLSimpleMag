@@ -92,10 +92,6 @@ void Memory::storeData(unsigned long curTime, float alt)
   Serial.print(alt);
   Serial.println("");
   
- 
-
-    
-  
 }
 
 uint8_t Memory::selectBlock()
@@ -116,6 +112,23 @@ uint8_t Memory::selectBlock()
   }
 }
 void Memory::writeByte(uint8_t byteToWrite, uint32_t byteLocation)
+{
+  digitalWrite(_SSPin1, LOW);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_WRITEENABLE);
+  digitalWrite(_SSPin1, HIGH);
+
+  digitalWrite(_SSPin1, LOW);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_PROGRAM);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
+
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, byteToWrite);
+  digitalWrite(_SSPin1, HIGH);
+
+}
+
+void Memory::write6Bytes(uint32_t bytesToWrite, uint32_t byteLocation)
 {
   digitalWrite(_SSPin1, LOW);
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_WRITEENABLE);
