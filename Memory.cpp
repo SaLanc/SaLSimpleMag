@@ -51,6 +51,9 @@ Memory::Memory(uint8_t SSPin, uint8_t MOSIPin, uint8_t MISOPin, uint8_t SCKPin)
   _MOSIPin = MOSIPin;
   _SCKPin = SCKPin;
 
+  currentBlock = selectBlock();
+  currentAddress = currentBlock + 0xFF;
+
 }
 
 uint8_t Memory::getByte(uint8_t address)
@@ -64,31 +67,6 @@ uint8_t Memory::getByte(uint8_t address)
   const uint8_t _byte1 = shiftIn(_MISOPin, _SCKPin, MSBFIRST);
 
   return _byte1;
-
-}
-void Memory::setNewAddress()
-{
-  Serial.println((long)currentAddress, HEX);
-  currentAddress = 0x000001;
-  //currentAddress =  currentAddress + 0x000001;
-  Serial.println((long)currentAddress, HEX);
-  eraseBlock();
-
-
-  digitalWrite(_SSPin1, LOW);
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_WRITEENABLE);
-  digitalWrite(_SSPin1, HIGH);
-  digitalWrite(_SSPin1, LOW);
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_PROGRAM);
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((addressFinder & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((addressFinder & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((addressFinder & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
-
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((currentAddress & 0xFF0000) >> 16));
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((currentAddress & 0x00FF00) >>  8));
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((currentAddress & 0x0000FF) >>  0));
-  digitalWrite(_SSPin1, HIGH);
-
 }
 
 void Memory::eraseBlock()
@@ -113,6 +91,11 @@ void Memory::storeData(unsigned long curTime, float alt)
   Serial.print("  current alt:");
   Serial.print(alt);
   Serial.println("");
+  
+ 
+
+    
+  
 }
 
 uint8_t Memory::selectBlock()
@@ -126,11 +109,27 @@ uint8_t Memory::selectBlock()
     Serial.print(" data: ");
     Serial.print(blockHeader);
     Serial.println(" ");
+
+    if (blockHeader == 0xFF) {
+      return blockHeader;
+    }
   }
 }
 void Memory::writeByte(uint8_t byteToWrite, uint32_t byteLocation)
 {
-  
+  digitalWrite(_SSPin1, LOW);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_WRITEENABLE);
+  digitalWrite(_SSPin1, HIGH);
+
+  digitalWrite(_SSPin1, LOW);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_PROGRAM);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
+
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, byteToWrite);
+  digitalWrite(_SSPin1, HIGH);
+
 }
 
 

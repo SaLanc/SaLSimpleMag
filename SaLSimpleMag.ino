@@ -42,10 +42,6 @@ Memory memory(SS_mem, MOSI, MISO, SCK);
 void setup() {
   Serial.begin(57600);
 
-
-  uint8_t block =  memory.selectBlock();
-  
-
   baro.reset_Baro();
   baro.readCoefficients();
   baro.readCoefficients();
@@ -65,7 +61,6 @@ void setup() {
 int ContCheck() {
 
   int _result = cont;
-
   if (millis() - contTimer > 5000) {
     contTimer = millis();
     int read_A = analogRead(sense_A);
@@ -93,7 +88,6 @@ int ContCheck() {
       tone(5, 400, 200);
     }
   }
-
   return _result;
 }
 
@@ -188,7 +182,6 @@ void logData( float alt) {
       memory.storeData(curTime, alt);
     }
   }
-
 }
 
 void loop() {

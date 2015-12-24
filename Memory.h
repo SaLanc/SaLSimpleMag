@@ -8,17 +8,17 @@ class Memory
   public:
     Memory(uint8_t SSpin, uint8_t MOSIPin, uint8_t MISOPin, uint8_t SCKPin);
     uint8_t getData(uint8_t address);
-    void setNewAddress();
     void eraseBlock();
-    uint8_t getByte(uint8_t address);
-    uint8_t selectBlock();
+
     void storeData(unsigned long curTime, float alt);
 
 
   private:
 
     void writeByte(uint8_t byteToWrite, uint32_t byteLocation);
-
+    uint8_t getByte(uint8_t address);
+    uint8_t selectBlock();
+    uint8_t currentBlock;
     uint8_t _SSPin1;
     uint8_t _MOSIPin;
     uint8_t _MISOPin;
