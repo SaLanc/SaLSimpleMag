@@ -95,6 +95,19 @@ void Memory::eraseBlock(uint8_t block)
 void Memory::storeData(unsigned long curTime, float alt)
 {
   int altitude = alt;
+
+  if ((currentAddress & 0x0000FF) > 0xF8) {
+    uint8_t _byte1 = (currentAddress & 0xFF0000) >> 16;
+    uint8_t _byte2 = (currentAddress & 0x00FF00) >> 8;
+    uint8_t _byte3 = 0x00;
+    _byte2 = _byte2 + 1;
+    currentAddress = _byte1;
+    currentAddress = (currentAddress * 256) + _byte2;
+    currentAddress = (currentAddress * 256) + _byte3;
+
+  }
+
+
   Serial.print("current time:");
   Serial.print(curTime);
   Serial.print("  current alt:");
@@ -104,8 +117,9 @@ void Memory::storeData(unsigned long curTime, float alt)
   Serial.print(currentAddress, HEX);
   Serial.print("");
   Serial.print("  ending address:");
-  Serial.print(((currentAddress & 0x0000FF) >>  0), HEX);
+  Serial.print(((currentAddress & 0x0000FF)), HEX);
   Serial.println("");
+
   currentAddress += 6;
   //write6Bytes(currentAddress, curTime, altitude);
 

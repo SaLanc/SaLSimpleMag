@@ -42,7 +42,7 @@ void setup() {
 
   //memory.eraseBlock(0);
   //delay(400);
-  //memory.eraseBlock(1);
+ // memory.eraseBlock(1);
   //delay(400);
   //memory.writeByte(B10111, 0x008000);
   //delay(100);
