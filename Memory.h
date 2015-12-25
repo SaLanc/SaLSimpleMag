@@ -8,16 +8,19 @@ class Memory
   public:
     Memory(uint8_t SSpin, uint8_t MOSIPin, uint8_t MISOPin, uint8_t SCKPin);
     uint8_t getData(uint8_t address);
-    void eraseBlock();
+    void eraseBlock(uint8_t block);
 
+    uint8_t getCurrentAddress();
     void storeData(unsigned long curTime, float alt);
+    void writeByte(uint8_t byteToWrite, uint32_t byteLocation);
+    uint8_t getByte(uint32_t address);
 
 
   private:
 
-    void writeByte(uint8_t byteToWrite, uint32_t byteLocation);
-    void write6Bytes(uint32_t bytesToWrite, uint32_t byteLocation);
-    uint8_t getByte(uint8_t address);
+
+    void write6Bytes(uint32_t byteLocation, uint32_t timeBytes, uint16_t altBytes);
+    
     uint8_t selectBlock();
     uint8_t currentBlock;
     uint8_t _SSPin1;

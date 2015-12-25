@@ -37,15 +37,24 @@ Baro baro(SS_baro, MOSI, MISO, SCK);
 Filter filter(1.0);
 Memory memory(SS_mem, MOSI, MISO, SCK);
 
-
-
 void setup() {
   Serial.begin(57600);
+
+  //memory.eraseBlock(0);
+  //delay(400);
+  //memory.eraseBlock(1);
+  //delay(400);
+  //memory.writeByte(B10111, 0x008000);
+  //delay(100);
+  //Serial.println(memory.getByte(0x000000));
+  //delay(100);
+  //Serial.println(memory.getByte(0x008000));
+  //Serial.println(memory.getCurrentAddress());
 
   baro.reset_Baro();
   baro.readCoefficients();
   baro.readCoefficients();
-  
+
   for (uint8_t i = 0; i < 50; ++i) {
     groundAlt += baro.getPres();
   }
@@ -143,7 +152,7 @@ void logData( float alt) {
   else if (tenth == 3) {
     if (currentLog == 3) {
       currentLog++;
-      memory.storeData(curTime, alt);
+      //memory.storeData(curTime, alt);
     }
   }
   else if (tenth == 4) {
@@ -173,7 +182,7 @@ void logData( float alt) {
   else if (tenth == 8) {
     if (currentLog == 8) {
       currentLog++;
-      memory.storeData(curTime, alt);
+     memory.storeData(curTime, alt);
     }
   }
   else if (tenth == 9) {
@@ -222,9 +231,9 @@ void loop() {
     Serial.println();
 
   */
-   float curAlt = (baro.getPres() / 30.48) - groundAlt;
-    float correctedAlt = filter.filterAlt(curAlt);
-    
-  ////logData(correctedAlt);
+  float curAlt = (baro.getPres() / 30.48) - groundAlt;
+  float correctedAlt = filter.filterAlt(curAlt);
+
+  logData(correctedAlt);
 }
 

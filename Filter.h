@@ -6,7 +6,7 @@
 class Filter
 {
   public:
-    Filter(float peram1);
+    Filter(uint32_t peram1);
     float filterAlt(float altInput);
 
   private:

@@ -9,7 +9,7 @@ class Baro
     Baro(uint8_t SSpin, uint8_t MOSIPin, uint8_t MISOPin, uint8_t SCKPin);
     int32_t readAdc(uint8_t CMD_);
     void reset_Baro();
-    int32_t getPres();
+    float getPres();
     void readCoefficients();
 
   private:

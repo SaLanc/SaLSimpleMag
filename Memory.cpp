@@ -52,11 +52,16 @@ Memory::Memory(uint8_t SSPin, uint8_t MOSIPin, uint8_t MISOPin, uint8_t SCKPin)
   _SCKPin = SCKPin;
 
   currentBlock = selectBlock();
-  currentAddress = currentBlock + 0xFF;
+  currentAddress = memoryBlock[currentBlock];
 
 }
 
-uint8_t Memory::getByte(uint8_t address)
+uint8_t Memory::getCurrentAddress()
+{
+  return currentAddress;
+}
+
+uint8_t Memory::getByte(uint32_t address)
 {
 
   digitalWrite(_SSPin1, LOW);
@@ -64,13 +69,16 @@ uint8_t Memory::getByte(uint8_t address)
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((address & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((address & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((address & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
-  const uint8_t _byte1 = shiftIn(_MISOPin, _SCKPin, MSBFIRST);
-
+  uint8_t _byte1 = shiftIn(_MISOPin, _SCKPin, MSBFIRST);
+  digitalWrite(_SSPin1, HIGH);
   return _byte1;
 }
 
-void Memory::eraseBlock()
+void Memory::eraseBlock(uint8_t block)
 {
+  uint32_t toErase = memoryBlock[block];
+
+  Serial.println(toErase, HEX);
 
   digitalWrite(_SSPin1, LOW);
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_WRITEENABLE);
@@ -78,20 +86,31 @@ void Memory::eraseBlock()
 
   digitalWrite(_SSPin1, LOW);
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_04K_ERASE);
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((addressFinder & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((addressFinder & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((addressFinder & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((toErase & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((toErase & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((toErase & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
   digitalWrite(_SSPin1, HIGH);
 }
 
 void Memory::storeData(unsigned long curTime, float alt)
 {
+  int altitude = alt;
   Serial.print("current time:");
   Serial.print(curTime);
   Serial.print("  current alt:");
-  Serial.print(alt);
+  Serial.print(altitude);
+  Serial.print("");
+  Serial.print("  current address:");
+  Serial.print(currentAddress, HEX);
+  Serial.print("");
+  Serial.print("  ending address:");
+  Serial.print(((currentAddress & 0x0000FF) >>  0), HEX);
   Serial.println("");
-  
+  currentAddress += 6;
+  //write6Bytes(currentAddress, curTime, altitude);
+
+
+
 }
 
 uint8_t Memory::selectBlock()
@@ -99,15 +118,8 @@ uint8_t Memory::selectBlock()
   for (uint8_t i = 0; i < 32; ++i) {
 
     uint8_t blockHeader = getByte(memoryBlock[i]);
-
-    Serial.print("Memory address: ");
-    Serial.print(memoryBlock[i], HEX);
-    Serial.print(" data: ");
-    Serial.print(blockHeader);
-    Serial.println(" ");
-
     if (blockHeader == 0xFF) {
-      return blockHeader;
+      return i;
     }
   }
 }
@@ -128,7 +140,7 @@ void Memory::writeByte(uint8_t byteToWrite, uint32_t byteLocation)
 
 }
 
-void Memory::write6Bytes(uint32_t bytesToWrite, uint32_t byteLocation)
+void Memory::write6Bytes(uint32_t byteLocation, uint32_t timeBytes, uint16_t altBytes)
 {
   digitalWrite(_SSPin1, LOW);
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, OPCODE_WRITEENABLE);
@@ -139,8 +151,9 @@ void Memory::write6Bytes(uint32_t bytesToWrite, uint32_t byteLocation)
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0xFF0000) >> 16)); // Byte address - MSB Sig Byte
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0x00FF00) >>  8)); // Byte address - MID Sig Byte
   shiftOut(_MOSIPin, _SCKPin, MSBFIRST, ((byteLocation & 0x0000FF) >>  0)); // Byte address - LSB Sig Byte
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, timeBytes);
+  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, altBytes);
 
-  shiftOut(_MOSIPin, _SCKPin, MSBFIRST, byteToWrite);
   digitalWrite(_SSPin1, HIGH);
 
 }

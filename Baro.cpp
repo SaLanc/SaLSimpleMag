@@ -77,7 +77,7 @@ void Baro::reset_Baro()
   delay(30);
 }
 
-int32_t Baro::getPres()
+float Baro::getPres()
 {
 
 
@@ -87,7 +87,7 @@ int32_t Baro::getPres()
 
 
 
-  const int32_t AltCm = pascalToCent(pressConv);
+  const float AltCm = pascalToCent(pressConv);
 
   return AltCm;
 }

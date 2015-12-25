@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "Filter.h"
 
-Filter::Filter(float peram1)
+Filter::Filter(uint32_t peram1)
 {
   for (uint8_t i = 0; i < 10; ++i) {
     AltStorage[i] = 0;
